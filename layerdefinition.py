@@ -15,12 +15,24 @@ def pool(input_data, spatial_extent = 2):
                             .max(axis = (1,3))
     return pooled_data
     
+def fullyconnected(input_data, weights, biases):
+    if len(input_data.shape) < 3:
+        im_h, im_w = input_data.shape
+        im_z = 1
+    else:
+        im_h, im_w, im_z = input_data.shape
+    
+    interim = input_data.reshape(im_h * im_w * im_z, 1)
+    output = np.dot(weights, interim) + biases
+    
+    return output
+      
 
 def conv2D(image, kernel = (np.array([[1, 1, 1],
                                      [1, 1, 1],
                                      [1, 1, 1]])), bias = 0):
     
-    image = image.astype(float) / 255.0
+    image = image.astype(float)
     kernel_sum = kernel.sum()
     
     if len(image.shape) == 3:
@@ -55,37 +67,60 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
                         weight = kernel[kx + int(kernel_height/2), 
                                         ky + int(kernel_width/2)]
                         
-                        weighted_pixel_sum += float(pixel) * float(weight)
+                        #weighted_pixel_sum += float(pixel) * float(weight)
+                        weighted_pixel_sum += float(pixel) * float(weight) + float(bias)
                
                 if len(image.shape) == 3:
-                    filtered[x, y, z] = float(weighted_pixel_sum) \
-                                        / float(kernel_sum) \
-                                        + float(bias)
+                    # filtered[x, y, z] = float(weighted_pixel_sum) \
+                                        # / float(kernel_sum) \
+                                        # + float(bias)
+                    #filtered[x,y,z] = activation(weighted_pixel_sum)
+                    filtered[x,y,z] = weighted_pixel_sum
                 else:
-                    filtered[x, y] = float(weighted_pixel_sum) \
-                                     / float(kernel_sum) \
-                                     + float(bias)
-            
-    return filtered*255.0
+                    # filtered[x, y] = float(weighted_pixel_sum) \
+                                     # / float(kernel_sum) \
+                                     # + float(bias)
+                    #filtered[x,y] = activation(weighted_pixel_sum)
+                    filtered[x,y] = weighted_pixel_sum
     
-                    
+    return filtered
+  
+def activation(x, derivation = False, method = 'sigmoid'):
+    if method == 'sigmoid':
+        if derivation:
+            return activation(x) * (1 - activation(x))
+        else:
+            return 1.0/(1.0 + np.exp(-x))
+    else:
+        raise Exception("Unknown activation method")
+
+def loss(expected, actual):
+    return 0.5*np.sum(expected - actual)**2
+
 if __name__ == '__main__':
-    
+        
     image = cv2.imread("test_input.png")
     kernel = (np.array([[1, 1, 1],
                       [1, 1, 1],
                       [1, 1, 1]]))
               
+    number_outputs = 2
     #input_data = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     input_data = cv2.resize(image, (100, 100), interpolation = cv2.INTER_CUBIC)
     
     convolved_image = conv2D(input_data, kernel)   
     cv2.imwrite("test1.png",convolved_image)
+    
     convolved_image = cv2.imread("test1.png", 0)
     convolved_image = pool(convolved_image)
-    cv2.imwrite("test2.png",convolved_image)
+    #cv2.imwrite("test2.png",convolved_image)
     
-    for i in range (convolved_image.shape[0]):
-        for j in range (convolved_image.shape[1]):
-            if convolved_image[i][j] < 0:
-                print "negative:",i,j
+    if len(convolved_image.shape) < 3:
+        w = np.random.randn(convolved_image.shape[0] * convolved_image.shape[1])
+    else:
+        w = np.random.randn(convolved_image.shape[0] * convolved_image.shape[1] * convolved_image.shape[2])
+    
+    b = np.random.randn(number_outputs, 1)
+    output = fullyconnected(convolved_image, w, b)
+    
+    print output
