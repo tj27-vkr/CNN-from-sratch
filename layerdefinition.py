@@ -8,8 +8,8 @@ def pool(input_data, spatial_extent = 2):
     else:
         raise Exception("Input to the pooling layer must be a 2D image")
     #print input_data.shape
-    r_h = im_h / spatial_extent
-    r_w = im_w / spatial_extent
+    r_h = im_h // spatial_extent
+    r_w = im_w // spatial_extent
     
     pooled_data = input_data.reshape(r_h, spatial_extent, r_w, spatial_extent)\
                             .max(axis = (1,3))
@@ -33,7 +33,7 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
                                      [1, 1, 1]])), bias = 0):
     
     image = image.astype(float)
-    kernel_sum = kernel.sum()
+    #kernel_sum = kernel.sum()
     
     if len(image.shape) == 3:
         image_height, image_width, image_depth = image.shape
@@ -68,7 +68,8 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
                                         ky + int(kernel_width/2)]
                         
                         #weighted_pixel_sum += float(pixel) * float(weight)
-                        weighted_pixel_sum += float(pixel) * float(weight) + float(bias)
+                        weighted_pixel_sum += float(pixel) * float(weight) \
+                                              + float(bias)
                
                 if len(image.shape) == 3:
                     # filtered[x, y, z] = float(weighted_pixel_sum) \
@@ -116,11 +117,14 @@ if __name__ == '__main__':
     #cv2.imwrite("test2.png",convolved_image)
     
     if len(convolved_image.shape) < 3:
-        w = np.random.randn(convolved_image.shape[0] * convolved_image.shape[1])
+        w = np.random.randn(convolved_image.shape[0] \
+                            * convolved_image.shape[1])
     else:
-        w = np.random.randn(convolved_image.shape[0] * convolved_image.shape[1] * convolved_image.shape[2])
+        w = np.random.randn(convolved_image.shape[0] \
+                            * convolved_image.shape[1] \
+                            * convolved_image.shape[2])
     
     b = np.random.randn(number_outputs, 1)
     output = fullyconnected(convolved_image, w, b)
     
-    print output
+    print (output)
