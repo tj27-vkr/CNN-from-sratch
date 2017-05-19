@@ -4,7 +4,7 @@ import numpy as np
 
 np.random.seed(10)
 
-image = cv2.imread("test_input.png", 0)
+image = cv2.imread("avacado.jpg", 0)
 number_outputs = 2
 y = np.array([[1],[0]])
 
@@ -33,9 +33,10 @@ for iteration in range(no_filters):
     pooled_image[iteration] = layer.pool(activated_values[iteration])
 
 #fully connected
-weight_2 = np.random.randn(pooled_image[0]*pooled_image[0]*pooled_image[0])
+weight_2 = np.random.randn(pooled_image.shape[0]*pooled_image.shape[1] \
+                                                *pooled_image.shape[2])
 bias_2 = np.random.randn(number_outputs, 1)
 fc_output = layer.fullyconnected(pooled_image, weight_2, bias_2)
 
 #results
-print "error value:",layer.loss(y,fc_output)
+print ("error value:",layer.loss(y,fc_output))
