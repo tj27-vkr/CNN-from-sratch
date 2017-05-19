@@ -25,18 +25,29 @@ for iteration in range(no_filters):
 
 
 #activation - sigmoid
-activated_values = layer.activation(convolved_image)
+activated_values_convolution = layer.activation(convolved_image)
 
 #max pooling
 pooled_image = np.empty([no_filters, 50,50], dtype = float)
-for iteration in range(no_filters):
-    pooled_image[iteration] = layer.pool(activated_values[iteration])
+for i in range(no_filters):
+    pooled_image[iteration] = layer.pool(activated_values_convolution[i])
 
 #fully connected
-weight_2 = np.random.randn(pooled_image.shape[0]*pooled_image.shape[1] \
-                                                *pooled_image.shape[2])
+weight_2 = np.array([np.random.randn(pooled_image.shape[0]*pooled_image.shape[1] \
+                                                *pooled_image.shape[2])])
 bias_2 = np.random.randn(number_outputs, 1)
 fc_output = layer.fullyconnected(pooled_image, weight_2, bias_2)
 
+#activation - sigmoid
+activated_values_fc = layer.activation(fc_output)
+
+#backprop parameters
+loss = layer.loss(y,activated_values_fc)
+delta_fc = loss*layer.activation(activated_values_fc, True)
+#delta_conv = delta_fc
+print (delta_fc.dot(weight_2))
+
 #results
-print ("error value:",layer.loss(y,fc_output))
+#print ("BackPropogation delta",delta_conv, delta_fc)
+print ("final output:",activated_values_fc)
+print ("error value:",loss)
