@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+sum_of_weights = 0
+
 def pool(input_data, spatial_extent = 2):
     
     if len(input_data.shape) < 3:
@@ -34,7 +36,6 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
     
     image = image.astype(float)
     #kernel_sum = kernel.sum()
-    
     if len(image.shape) == 3:
         image_height, image_width, image_depth = image.shape
     else:
@@ -43,7 +44,7 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
     kernel_height, kernel_width = int(kernel.shape[0]), int(kernel.shape[1])
     
     filtered = np.zeros_like(image)
-  
+    w_sum = 0
     for z in range(image_depth):
         for x in range(image_height):
             for y in range(image_width):
@@ -70,7 +71,7 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
                         #weighted_pixel_sum += float(pixel) * float(weight)
                         weighted_pixel_sum += float(pixel) * float(weight) \
                                               + float(bias)
-               
+                        w_sum += float(weight)
                 if len(image.shape) == 3:
                     # filtered[x, y, z] = float(weighted_pixel_sum) \
                                         # / float(kernel_sum) \
@@ -83,6 +84,9 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
                                      # + float(bias)
                     #filtered[x,y] = activation(weighted_pixel_sum)
                     filtered[x,y] = weighted_pixel_sum
+    
+    global sum_of_weights
+    sum_of_weights = w_sum
     
     return filtered
   
@@ -98,6 +102,9 @@ def activation(x, derivation = False, method = 'sigmoid'):
 def loss(expected, actual):
     return 0.5*np.sum(expected - actual)**2
 
+def get_weights_sum():
+    return sum_of_weights
+    
 if __name__ == '__main__':
         
     image = cv2.imread("test_input.png")
