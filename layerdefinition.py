@@ -25,14 +25,18 @@ def fullyconnected(input_data, weights, biases):
         im_h, im_w, im_z = input_data.shape
     
     interim = input_data.reshape(im_h * im_w * im_z, 1)
-    output = np.dot(weights, interim) + biases
+    output = np.dot(weights.T, interim) + biases
     
     return output
       
 
-def conv2D(image, kernel = (np.array([[1, 1, 1],
-                                     [1, 1, 1],
-                                     [1, 1, 1]])), bias = 0):
+def conv2D(image,\
+           delta_conv,\
+           learning_rate,\
+           kernel = (np.array([[1, 1, 1],
+                              [1, 1, 1],
+                              [1, 1, 1]])),\
+           bias = 0):
     
     image = image.astype(float)
     #kernel_sum = kernel.sum()
@@ -65,24 +69,19 @@ def conv2D(image, kernel = (np.array([[1, 1, 1],
                                 pixel = float(image[pixel_x, pixel_y, z])
                             else:
                                 pixel = float(image[pixel_x, pixel_y])
+                        #updating the weights as we go
                         weight = kernel[kx + int(kernel_height/2), 
-                                        ky + int(kernel_width/2)]
+                                        ky + int(kernel_width/2)] \
+                                 - float(learning_rate) \
+                                 * float(delta_conv[x, y])
+                                        
                         
-                        #weighted_pixel_sum += float(pixel) * float(weight)
                         weighted_pixel_sum += float(pixel) * float(weight) \
                                               + float(bias)
                         w_sum += float(weight)
                 if len(image.shape) == 3:
-                    # filtered[x, y, z] = float(weighted_pixel_sum) \
-                                        # / float(kernel_sum) \
-                                        # + float(bias)
-                    #filtered[x,y,z] = activation(weighted_pixel_sum)
                     filtered[x,y,z] = weighted_pixel_sum
                 else:
-                    # filtered[x, y] = float(weighted_pixel_sum) \
-                                     # / float(kernel_sum) \
-                                     # + float(bias)
-                    #filtered[x,y] = activation(weighted_pixel_sum)
                     filtered[x,y] = weighted_pixel_sum
     
     global sum_of_weights
