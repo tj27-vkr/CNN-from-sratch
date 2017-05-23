@@ -31,8 +31,6 @@ def fullyconnected(input_data, weights, biases):
       
 
 def conv2D(image,\
-           delta_conv,\
-           learning_rate,\
            kernel = (np.array([[1, 1, 1],
                               [1, 1, 1],
                               [1, 1, 1]])),\
@@ -72,8 +70,8 @@ def conv2D(image,\
                         #updating the weights as we go
                         weight = kernel[kx + int(kernel_height/2), 
                                         ky + int(kernel_width/2)] \
-                                 - float(learning_rate) \
-                                 * float(delta_conv[x, y])
+                                 #- float(learning_rate) \
+                                 #* float(delta_conv[x, y])
                                         
                         
                         weighted_pixel_sum += float(pixel) * float(weight) \
