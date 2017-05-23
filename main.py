@@ -30,8 +30,6 @@ for epoch in range(1):
     weights_summation = np.empty([no_filters,1], dtype = float)
     for iteration in range(no_filters):
         convolved_image[iteration] = np.array(layer.conv2D(arr,\
-                                                        delta_conv[iteration],\
-                                                        learning_rate,\
                                                         weight_1[iteration],\
                                                         bias_1[iteration]))
         weights_summation[iteration] = np.array(layer.sum_of_weights)
@@ -69,16 +67,16 @@ for epoch in range(1):
                
     d_conv_temp =  delta_conv_temp * \
                    layer.activation(convolved_image, True)[0]
+        
+    delta_conv = np.dot(arr, d_conv_temp)   
+    delta_conv_sum = np.sum(delta_conv)             
     
- 
-    
-    delta_conv = np.dot(arr, d_conv_temp)                
     #updating the weights    
-    #weight_1 is updated in the convolution function while applying the kernel
     weight_2_r[0] = weight_2_r[0] - learning_rate * delta_fc
     weight_2_r[1] = weight_2_r[1] - learning_rate * delta_fc
-    
     weight_2 = weight_2_r.reshape(2500,2)
     
+    weight_1 = weight_1 - learning_rate * delta_conv_sum
+
     #results
     print ("error value:",loss_fc)
